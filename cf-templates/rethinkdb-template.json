@@ -60,11 +60,35 @@
 
 	        "Metadata" : {
         		"AWS::CloudFormation::Init" : {
-        			"config" : {
+					"configSets" : {
+					  "rethinkDbConfig": ["yumRepo", "yumInstall", "dbStart"]
+					},
+				  	"yumRepo" : {
+						"files" : {
+							"/etc/yum.repos.d/rethinkdb.repo" : {
+								"content" : { "Fn::Join" : ["", [
+								  "[rethinkdb]\n",
+								  "name=RethinkDB\n",
+								  "baseurl=http://download.rethinkdb.com/centos/6/x86_64/\n",
+								  "gpgcheck=0\n",
+								  "enabled=1\n"
+								]]},
+							  	"mode"  : "000644",
+							    "owner" : "root",
+							  	"group" : "root"
+							}
+						}
+					},
+				  	"yumInstall" : {
+						"packages" : {
+							"yum" : {
+								"rethinkdb" : []
+							}
+						}
+					},
+        			"dbStart" : {
         				"commands" : {
-        					"01-wget-binary-distribution" : { "command" : "sudo wget http://download.rethinkdb.com/centos/6/`uname -m`/rethinkdb.repo -O /etc/yum.repos.d/rethinkdb.repo" },
-        					"02-retrieve-repo-key" : { "command" : "sudo yum -y install rethinkdb" },
-        					"03-start-rethinkdb-server" : { "command" : "rethinkdb --bind all" }
+        					"start-server" : { "command" : "rethinkdb --bind all" }
         				}
         			}
         		}

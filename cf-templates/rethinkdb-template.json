@@ -61,7 +61,7 @@
 	        "Metadata" : {
         		"AWS::CloudFormation::Init" : {
 					"configSets" : {
-					  "rethinkDbConfig": ["yumRepo", "yumInstall", "dbStart"]
+					  "default": ["yumRepo", "yumInstall", "dbStart"]
 					},
 				  	"yumRepo" : {
 						"files" : {

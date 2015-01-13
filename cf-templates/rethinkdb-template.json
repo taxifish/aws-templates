@@ -19,8 +19,8 @@
 	    "DbImageID" : {
       		"Description" : "hardcoded for the us-west-1 region",
       		"Type" : "String",
-      		"Default" : "ami-076e6542",
-      		"AllowedValues" : [ "ami-076e6542"]
+      		"Default" : "ami-4b6f650e",
+      		"AllowedValues" : [ "ami-4b6f650e"]
     	},
 
     	"KeyName": {
@@ -62,11 +62,9 @@
         		"AWS::CloudFormation::Init" : {
         			"config" : {
         				"commands" : {
-        					"01-add-apt-repository" : "source /etc/lsb-release && echo \"deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main\" | sudo tee /etc/apt/sources.list.d/rethinkdb.list",
-        					"02-retrieve-repo-key" : "wget -qO- http://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -",
-        					"03-update-repos" : "sudo apt-get update",
-        					"04-install-rethinkdb" : "sudo apt-get install rethinkdb",
-        					"05-start-rethinkdb-server" : "rethinkdb --bind all"
+        					"01-wget-binary-distribution" : { "command" : "sudo wget http://download.rethinkdb.com/centos/6/`uname -m`/rethinkdb.repo -O /etc/yum.repos.d/rethinkdb.repo" },
+        					"02-retrieve-repo-key" : { "command" : "sudo yum -y install rethinkdb" },
+        					"03-start-rethinkdb-server" : { "command" : "rethinkdb --bind all" }
         				}
         			}
         		}
@@ -81,7 +79,14 @@
 		        "Tags" : [
 		          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
 		          { "Key": "Name", "Value" : "rethinkdb-01" }
-		        ]
+		        ],
+				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+				  "#!/bin/sh\n",
+				  "/opt/aws/bin/cfn-init ",
+				  " -s ", { "Ref" : "AWS::StackName" },
+				  " -r DBInstance01 ",
+				  " --region ", { "Ref" : "AWS::Region" }, "\n"
+				]]}}
 		    }
 	    },
 

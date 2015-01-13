@@ -47,6 +47,15 @@
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
+    "CLIInstanceCount" : {
+      "Description" : "Number of device emulation client instances",
+      "Type" : "Number",
+      "Default" : 1,
+      "MaxValue" : 3,
+      "MinValue" : 0,
+      "ConstraintDescription" : "Must be a number between 0 and 3"
+    },
+
     "SRVInstanceType" : {
       "Description" : "Connection server instance type",
       "Type" : "String",
@@ -56,6 +65,15 @@
         "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge"]
     ,
       "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "SRVInstanceCount" : {
+      "Description" : "Number of connection server instances",
+      "Type" : "Number",
+      "Default" : 1,
+      "MaxValue" : 10,
+      "MinValue" : 0,
+      "ConstraintDescription" : "Must be a number between 0 and 3"
     },
 
     "KFKInstanceType" : {
@@ -69,6 +87,35 @@
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
+    "KFKInstanceCount" : {
+      "Description" : "Number of Kafka node instances",
+      "Type" : "Number",
+      "Default" : 1,
+      "MaxValue" : 3,
+      "MinValue" : 0,
+      "ConstraintDescription" : "Must be a number between 0 and 3"
+    },
+
+    "ZKInstanceType" : {
+      "Description" : "ZooKeeper node instance type",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : [ "t2.micro", "m1.small", "m1.medium", "m1.large", "m1.xlarge",
+        "m2.xlarge", "m2.2xlarge", "m2.4xlarge",
+        "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge"]
+    ,
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "ZKInstanceCount" : {
+      "Description" : "Number of ZooKeeper node instances",
+      "Type" : "Number",
+      "Default" : 0,
+      "MaxValue" : 3,
+      "MinValue" : 0,
+      "ConstraintDescription" : "Must be a number between 0 and 3"
+    },
+
     "CASInstanceType" : {
       "Description" : "Cassandra node instance type",
       "Type" : "String",
@@ -80,6 +127,15 @@
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
+    "CASInstanceCount" : {
+      "Description" : "Number of Cassandra node instances",
+      "Type" : "Number",
+      "Default" : 1,
+      "MaxValue" : 3,
+      "MinValue" : 0,
+      "ConstraintDescription" : "Must be a number between 0 and 3"
+    },
+
     "SPAInstanceType" : {
       "Description" : "Spark node instance type",
       "Type" : "String",
@@ -89,6 +145,15 @@
         "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge"]
     ,
       "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "SPAInstanceCount" : {
+      "Description" : "Number of Spark node instances",
+      "Type" : "Number",
+      "Default" : 1,
+      "MaxValue" : 3,
+      "MinValue" : 0,
+      "ConstraintDescription" : "Must be a number between 0 and 3"
     }
 
   },
@@ -166,7 +231,7 @@
       }
     },
 
-    "CMDInstance" : {
+    "CMDServerInstance" : {
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
         "ImageId" : {"Ref" : "CMDInstanceID"},
@@ -187,7 +252,7 @@
     "CMDEip" : {
       "Type" : "AWS::EC2::EIP",
       "Properties" : {
-        "InstanceId" : { "Ref" : "CMDInstance"}
+        "InstanceId" : { "Ref" : "CMDServerInstance"}
       }
     },
 
@@ -213,7 +278,7 @@
       "Properties" : {
         "RouteTableId" : { "Ref" : "PrivateRouteTable" },
         "DestinationCidrBlock" : "0.0.0.0/0",
-        "InstanceId" : { "Ref" : "CMDInstance" }
+        "InstanceId" : { "Ref" : "CMDServerInstance" }
       }
     },
 
@@ -236,85 +301,24 @@
       }
     },
 
-    "CLIInstance" : {
+    "MongoServerInstance" : {
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
-        "ImageId" : {"Ref" : "InstanceID"},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "ImageId" : {"Ref" : "UbuntuInstanceID"},
+        "SecurityGroupIds" : [{"Ref" : "DataSecurityGroup"}],
+        "SubnetId" : {"Ref" : "DataSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "CLIInstanceType"},
+        "InstanceType" : {"Ref": "MongoInstanceType"},
         "PrivateIpAddress" : "10.0.10.10",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "device-emulator-client-instance" }
+          { "Key": "Name", "Value" : "mongo-instance-demo-01" }
         ]
       }
-    },
 
-    "SRVInstance" : {
-      "Type" : "AWS::EC2::Instance",
-      "Properties" : {
-        "ImageId" : {"Ref" : "InstanceID"},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "SRVInstanceType"},
-        "PrivateIpAddress" : "10.0.10.20",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "device-connection-server-instance" }
-        ]
-      }
-    },
-
-    "KFKInstance" : {
-      "Type" : "AWS::EC2::Instance",
-      "Properties" : {
-        "ImageId" : {"Ref" : "InstanceID"},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "KFKInstanceType"},
-        "PrivateIpAddress" : "10.0.10.30",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "kafka-node-instance" }
-        ]
-      }
-    },
-
-    "CASInstance" : {
-      "Type" : "AWS::EC2::Instance",
-      "Properties" : {
-        "ImageId" : {"Ref" : "InstanceID"},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "CASInstanceType"},
-        "PrivateIpAddress" : "10.0.10.40",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "cassandra-node-instance" }
-        ]
-      }
-    },
-
-    "SPAInstance" : {
-      "Type" : "AWS::EC2::Instance",
-      "Properties" : {
-        "ImageId" : {"Ref" : "InstanceID"},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "SPAInstanceType"},
-        "PrivateIpAddress" : "10.0.10.50",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "spark-node-instance" }
-        ]
-      }
     }
+
+
 
   },
 

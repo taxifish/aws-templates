@@ -1,0 +1,625 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "Berkeley Demo AWS CloudFormation template",
+
+  "Parameters" : {
+
+
+    "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+
+    "SSHLocation" : {
+      "Description" : " The IP address range that can be used to SSH to the EC2 instances",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    },
+
+    "CMDInstanceType" : {
+      "Description" : "Command/NAT server instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
+                          "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+                          "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+                          "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+                          "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+                          "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "CLIInstanceType" : {
+      "Description" : "Device emulation client instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
+                          "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+                          "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+                          "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+                          "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+                          "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "CLIInstallMode" : {
+      "Description" : "Installation mode of CLI machines (none, single, triple) ",
+      "Type" : "String",
+      "Default" : "none",
+      "AllowedValues" : [ "none", "single", "triple"]
+    },
+
+    "SRVInstanceType" : {
+      "Description" : "Connection server instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
+        "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+        "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+        "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+        "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "SRVInstallMode" : {
+      "Description" : "Installation mode of SRV machines (none, single, triple) ",
+      "Type" : "String",
+      "Default" : "single",
+      "AllowedValues" : [ "none", "single", "triple"]
+    },
+
+    "KFKInstanceType" : {
+      "Description" : "Kafka node instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
+        "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+        "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+        "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+        "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "KFKInstallMode" : {
+      "Description" : "Installation mode of Kafka machines (none, single, triple) ",
+      "Type" : "String",
+      "Default" : "triple",
+      "AllowedValues" : [ "none", "single", "triple"]
+    },
+
+    "ZKInstanceType" : {
+      "Description" : "ZooKeeper node instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
+        "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+        "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+        "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+        "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "ZKInstallMode" : {
+      "Description" : "Installation mode of ZooKeeper machines (none, single, double) ",
+      "Type" : "String",
+      "Default" : "none",
+      "AllowedValues" : [ "none", "single", "double"]
+    },
+
+    "CASInstanceType" : {
+      "Description" : "Cassandra node instance type",
+      "Type" : "String",
+      "Default" : "m1.small",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
+        "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+        "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+        "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+        "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "CASInstallMode" : {
+      "Description" : "Installation mode of Cassandra machines (none, single, triple) ",
+      "Type" : "String",
+      "Default" : "triple",
+      "AllowedValues" : [ "none", "single", "triple"]
+    }
+
+  },
+
+  "Mappings" : {
+    "AWSInstanceType2Arch" : {
+      "t1.micro"    : { "Arch" : "PV64"   },
+      "t2.micro"    : { "Arch" : "HVM64"  },
+      "t2.small"    : { "Arch" : "HVM64"  },
+      "t2.medium"   : { "Arch" : "HVM64"  },
+      "m1.small"    : { "Arch" : "PV64"   },
+      "m1.medium"   : { "Arch" : "PV64"   },
+      "m1.large"    : { "Arch" : "PV64"   },
+      "m1.xlarge"   : { "Arch" : "PV64"   },
+      "m2.xlarge"   : { "Arch" : "PV64"   },
+      "m2.2xlarge"  : { "Arch" : "PV64"   },
+      "m2.4xlarge"  : { "Arch" : "PV64"   },
+      "m3.medium"   : { "Arch" : "HVM64"  },
+      "m3.large"    : { "Arch" : "HVM64"  },
+      "m3.xlarge"   : { "Arch" : "HVM64"  },
+      "m3.2xlarge"  : { "Arch" : "HVM64"  },
+      "c1.medium"   : { "Arch" : "PV64"   },
+      "c1.xlarge"   : { "Arch" : "PV64"   },
+      "c3.large"    : { "Arch" : "HVM64"  },
+      "c3.xlarge"   : { "Arch" : "HVM64"  },
+      "c3.2xlarge"  : { "Arch" : "HVM64"  },
+      "c3.4xlarge"  : { "Arch" : "HVM64"  },
+      "c3.8xlarge"  : { "Arch" : "HVM64"  },
+      "g2.2xlarge"  : { "Arch" : "HVMG2"  },
+      "r3.large"    : { "Arch" : "HVM64"  },
+      "r3.xlarge"   : { "Arch" : "HVM64"  },
+      "r3.2xlarge"  : { "Arch" : "HVM64"  },
+      "r3.4xlarge"  : { "Arch" : "HVM64"  },
+      "r3.8xlarge"  : { "Arch" : "HVM64"  },
+      "i2.xlarge"   : { "Arch" : "HVM64"  },
+      "i2.2xlarge"  : { "Arch" : "HVM64"  },
+      "i2.4xlarge"  : { "Arch" : "HVM64"  },
+      "i2.8xlarge"  : { "Arch" : "HVM64"  },
+      "hi1.4xlarge" : { "Arch" : "HVM64"  },
+      "hs1.8xlarge" : { "Arch" : "HVM64"  },
+      "cr1.8xlarge" : { "Arch" : "HVM64"  },
+      "cc2.8xlarge" : { "Arch" : "HVM64"  }
+    },
+
+    "AWSRegionArch2AMI" : {
+      "us-east-1"      : { "PV64" : "ami-50842d38", "HVM64" : "ami-08842d60", "HVMG2" : "ami-3a329952"  },
+      "us-west-2"      : { "PV64" : "ami-af86c69f", "HVM64" : "ami-8786c6b7", "HVMG2" : "ami-47296a77"  },
+      "us-west-1"      : { "PV64" : "ami-c7a8a182", "HVM64" : "ami-cfa8a18a", "HVMG2" : "ami-331b1376"  },
+      "eu-west-1"      : { "PV64" : "ami-aa8f28dd", "HVM64" : "ami-748e2903", "HVMG2" : "ami-00913777"  },
+      "eu-central-1"   : { "PV64" : "ami-a03503bd", "HVM64" : "ami-b43503a9", "HVMG2" : "ami-b03503ad"  }
+    },
+
+    "AWSRegionArch2NATAMI" : {
+      "us-east-1"      : { "PV64" : "ami-224dc94a", "HVM64" : "ami-4c9e4b24", "HVMG2" : "ami-184dc970"  },
+      "us-west-2"      : { "PV64" : "ami-030f4133", "HVM64" : "ami-bb69128b", "HVMG2" : "ami-290f4119"  },
+      "us-west-1"      : { "PV64" : "ami-7850793d", "HVM64" : "ami-2b2b296e", "HVMG2" : "ami-1d2b2958"  },
+      "eu-west-1"      : { "PV64" : "ami-30913f47", "HVM64" : "ami-3760b040", "HVMG2" : "ami-14913f63"  },
+      "eu-central-1"   : { "PV64" : "ami-6c487e71", "HVM64" : "ami-204c7a3d", "HVMG2" : "ami-ae380eb3"  }
+    }
+
+
+  },
+
+  "Conditions" : {
+
+    "CliModeInstallSingle" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "CLIInstallMode"}, "none"]}]},
+    "CliModeInstallTriple" : {"Fn::Equals" : [{"Ref" : "CLIInstallMode"}, "triple"]},
+
+    "SrvModeInstallSingle" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "SRVInstallMode"}, "none"]}]},
+    "SrvModeInstallTriple" : {"Fn::Equals" : [{"Ref" : "SRVInstallMode"}, "triple"]},
+
+    "KfkModeInstallSingle" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "KFKInstallMode"}, "none"]}]},
+    "KfkModeInstallTriple" : {"Fn::Equals" : [{"Ref" : "KFKInstallMode"}, "triple"]},
+
+    "ZkModeInstallSingle" :  {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "ZKInstallMode"}, "none"]}]},
+    "ZkModeInstallDouble" :  {"Fn::Equals" : [{"Ref" : "ZKInstallMode"}, "double"]},
+
+    "CasModeInstallSingle" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "CASInstallMode"}, "none"]}]},
+    "CasModeInstallTriple" : {"Fn::Equals" : [{"Ref" : "CASInstallMode"}, "triple"]}
+
+  },
+
+  "Resources" : {
+
+    "VPC" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : "10.0.0.0/16",
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "MainSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "CidrBlock" : "10.0.0.0/24",
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "InternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "AttachGateway" : {
+      "Type" : "AWS::EC2::VPCGatewayAttachment",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "InternetGatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+
+    "MainRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPC"},
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "MainRoute1" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "MainRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+
+    "SubnetRouteTableAssociation1" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "MainSubnet" },
+        "RouteTableId" : { "Ref" : "MainRouteTable" }
+      }
+    },
+
+    "MainSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Enable SSH access via port 22 and website access via 8080",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}},
+          { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "-1", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/16"}
+        ]
+      }
+    },
+
+    "CMDServerInstance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2NATAMI", { "Ref" : "AWS::Region" },
+                    { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CMDInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CMDInstanceType"},
+        "PrivateIpAddress" : "10.0.0.10",
+        "SourceDestCheck" : false,
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "cmd-instance" }
+        ]
+      }
+
+    },
+
+    "CMDEip" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "InstanceId" : { "Ref" : "CMDServerInstance"}
+      }
+    },
+
+    "PrivateSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "CidrBlock" : "10.0.10.0/24",
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "PrivateRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPC"},
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "PrivateRoute1" : {
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "InstanceId" : { "Ref" : "CMDServerInstance" }
+      }
+    },
+
+    "SubnetRouteTableAssociation2" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PrivateSubnet" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
+      }
+    },
+
+    "PrivateSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Enable SSH access via port 22",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24" },
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1",  "CidrIp" : "10.0.0.0/24" }
+        ]
+      }
+    },
+
+
+    "CLIInstance01" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "CliModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CLIInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CLIInstanceType"},
+        "PrivateIpAddress" : "10.0.10.11",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "device-emulator-client-instance-01" }
+        ]
+      }
+    },
+
+    "CLIInstance02" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "CliModeInstallTriple",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CLIInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CLIInstanceType"},
+        "PrivateIpAddress" : "10.0.10.12",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "device-emulator-client-instance-02" }
+        ]
+      }
+    },
+
+    "CLIInstance03" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "CliModeInstallTriple",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CLIInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CLIInstanceType"},
+        "PrivateIpAddress" : "10.0.10.13",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "device-emulator-client-instance-03" }
+        ]
+      }
+    },
+
+    "SRVInstance01" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "SrvModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SRVInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "SRVInstanceType"},
+        "PrivateIpAddress" : "10.0.10.21",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "websocket-server-instance-01" }
+        ]
+      }
+    },
+
+    "SRVInstance02" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "SrvModeInstallTriple",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SRVInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "SRVInstanceType"},
+        "PrivateIpAddress" : "10.0.10.22",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "websocket-server-instance-02" }
+        ]
+      }
+    },
+
+    "SRVInstance03" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "SrvModeInstallTriple",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SRVInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "SRVInstanceType"},
+        "PrivateIpAddress" : "10.0.10.23",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "websocket-server-instance-03" }
+        ]
+      }
+    },
+
+    "KFKInstance01" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "KfkModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "KFKInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "KFKInstanceType"},
+        "PrivateIpAddress" : "10.0.10.31",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "kafka-instance-01" }
+        ]
+      }
+    },
+
+    "KFKInstance02" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "KfkModeInstallTriple",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "KFKInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "KFKInstanceType"},
+        "PrivateIpAddress" : "10.0.10.32",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "kafka-instance-02" }
+        ]
+      }
+    },
+
+    "KFKInstance03" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "KfkModeInstallTriple",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "KFKInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "KFKInstanceType"},
+        "PrivateIpAddress" : "10.0.10.33",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "kafka-instance-03" }
+        ]
+      }
+    },
+
+    "ZKInstance01" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "ZkModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ZKInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "ZKInstanceType"},
+        "PrivateIpAddress" : "10.0.10.41",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "zookeeper-instance-01" }
+        ]
+      }
+    },
+
+    "ZKInstance02" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "ZkModeInstallDouble",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ZKInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "ZKInstanceType"},
+        "PrivateIpAddress" : "10.0.10.42",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "zookeeper-instance-02" }
+        ]
+      }
+    },
+
+    "CASInstance01" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "CasModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CASInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CASInstanceType"},
+        "PrivateIpAddress" : "10.0.10.51",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "cassandra-instance-01" }
+        ]
+      }
+    },
+
+    "CASInstance02" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "CasModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CASInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CASInstanceType"},
+        "PrivateIpAddress" : "10.0.10.52",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "cassandra-instance-02" }
+        ]
+      }
+    },
+
+    "CASInstance03" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition" : "CasModeInstallSingle",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CASInstanceType" }, "Arch" ] } ]},
+        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
+        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "KeyName" : {"Ref" : "KeyName"},
+        "InstanceType" : {"Ref": "CASInstanceType"},
+        "PrivateIpAddress" : "10.0.10.53",
+        "Tags": [
+          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
+          { "Key": "Name", "Value" : "cassandra-instance-03" }
+        ]
+      }
+    }
+
+  },
+
+  "Outputs" : {
+    "CMDInstanceEIP" : {
+      "Value" : { "Ref" : "CMDEip" },
+      "Description" : "Created Command Server EIP"
+    }
+  }
+
+}

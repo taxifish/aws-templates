@@ -242,7 +242,8 @@
         "VpcId" : { "Ref" : "VPC" },
         "GroupDescription" : "Enable SSH access via port 22",
         "SecurityGroupIngress" : [
-          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24" }
+          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24" },
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1",  "CidrIp" : "10.0.0.0/24" }
         ]
       }
     },

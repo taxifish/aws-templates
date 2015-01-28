@@ -22,36 +22,23 @@
       "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
     },
 
-    "CMDInstanceType" : {
-      "Description" : "Command/NAT server instance type",
-      "Type" : "String",
-      "Default" : "m1.small",
-      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
-                          "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
-                          "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
-                          "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
-                          "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
-                          "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
-      "ConstraintDescription" : "must be a valid EC2 instance type."
-    },
-
     "CLIInstanceType" : {
       "Description" : "Device emulation client instance type",
       "Type" : "String",
       "Default" : "m1.small",
       "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large",
-                          "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
-                          "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
-                          "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
-                          "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
-                          "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+        "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large",
+        "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge",
+        "c3.4xlarge", "c3.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge",
+        "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge",
+        "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
     "CLIInstallMode" : {
       "Description" : "Installation mode of CLI machines (none, single, triple) ",
       "Type" : "String",
-      "Default" : "none",
+      "Default" : "triple",
       "AllowedValues" : [ "none", "single", "triple"]
     },
 
@@ -71,7 +58,7 @@
     "SRVInstallMode" : {
       "Description" : "Installation mode of SRV machines (none, single, triple) ",
       "Type" : "String",
-      "Default" : "none",
+      "Default" : "single",
       "AllowedValues" : [ "none", "single", "triple"]
     },
 
@@ -91,7 +78,7 @@
     "KFKInstallMode" : {
       "Description" : "Installation mode of Kafka machines (none, single, triple) ",
       "Type" : "String",
-      "Default" : "none",
+      "Default" : "triple",
       "AllowedValues" : [ "none", "single", "triple"]
     },
 
@@ -111,23 +98,8 @@
     "ZKInstallMode" : {
       "Description" : "Installation mode of ZooKeeper machines (none, single, double) ",
       "Type" : "String",
-      "Default" : "none",
-      "AllowedValues" : [ "none", "single", "double"]
-    },
-
-    "CASInstanceType" : {
-      "Description" : "Cassandra node instance type",
-      "Type" : "String",
-      "Default" : "m3.large",
-      "AllowedValues" : [ "m3.large", "m3.xlarge", "c3.2xlarge", "i2.2xlarge"],
-      "ConstraintDescription" : "must be a valid EC2 instance type."
-    },
-
-    "CASInstallMode" : {
-      "Description" : "Installation mode of Cassandra machines (none, single, triple) ",
-      "Type" : "String",
       "Default" : "single",
-      "AllowedValues" : [ "none", "single", "triple"]
+      "AllowedValues" : [ "none", "single", "double"]
     }
 
   },
@@ -191,6 +163,13 @@
       "us-west-2"      : { "PV64" : "ami-030f4133", "HVM64" : "ami-bb69128b", "HVMG2" : "ami-290f4119"  },
       "us-west-1"      : { "PV64" : "ami-7850793d", "HVM64" : "ami-2b2b296e", "HVMG2" : "ami-1d2b2958"  },
       "eu-west-1"      : { "PV64" : "ami-30913f47", "HVM64" : "ami-3760b040", "HVMG2" : "ami-14913f63"  }
+    },
+
+    "AWSRegion2CMDAMI" : {
+      "us-west-1" : { "ami" : "ami-076e6542"},
+      "us-west-2" : { "ami" : "ami-3d50120d"},
+      "us-east-1" : { "ami" : "ami-9eaa1cf6"},
+      "eu-west-1" : { "ami" : "ami-f0b11187"}
     }
 
 
@@ -208,10 +187,7 @@
     "KfkModeInstallTriple" : {"Fn::Equals" : [{"Ref" : "KFKInstallMode"}, "triple"]},
 
     "ZkModeInstallSingle" :  {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "ZKInstallMode"}, "none"]}]},
-    "ZkModeInstallDouble" :  {"Fn::Equals" : [{"Ref" : "ZKInstallMode"}, "double"]},
-
-    "CasModeInstallSingle" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "CASInstallMode"}, "none"]}]},
-    "CasModeInstallTriple" : {"Fn::Equals" : [{"Ref" : "CASInstallMode"}, "triple"]}
+    "ZkModeInstallDouble" :  {"Fn::Equals" : [{"Ref" : "ZKInstallMode"}, "double"]}
 
   },
 
@@ -282,84 +258,34 @@
         "GroupDescription" : "Enable SSH access via port 22 and website access via 8080",
         "SecurityGroupIngress" : [
           { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}},
-          { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "8888", "ToPort" : "8888", "CidrIp" : "0.0.0.0/0"},
           { "IpProtocol" : "-1", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/16"}
         ]
       }
     },
 
-    "CMDServerInstance" : {
+    "CMDInstance" : {
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
-        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2NATAMI", { "Ref" : "AWS::Region" },
-                    { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CMDInstanceType" }, "Arch" ] } ]},
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2CMDAMI", { "Ref" : "AWS::Region" }, "ami"]},
         "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
         "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "CMDInstanceType"},
-        "PrivateIpAddress" : "10.0.0.10",
-        "SourceDestCheck" : false,
+        "InstanceType" : "t2.medium",
+        "PrivateIpAddress" : "10.0.0.101",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "cmd-instance" }
+          { "Key": "Name", "Value" : "command-box-instance" }
         ]
       }
-
     },
 
     "CMDEip" : {
       "Type" : "AWS::EC2::EIP",
       "Properties" : {
-        "InstanceId" : { "Ref" : "CMDServerInstance"}
+        "InstanceId" : { "Ref" : "CMDInstance"}
       }
     },
-
-    "PrivateSubnet" : {
-      "Type" : "AWS::EC2::Subnet",
-      "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
-        "CidrBlock" : "10.0.10.0/24",
-        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
-      }
-    },
-
-    "PrivateRouteTable" : {
-      "Type" : "AWS::EC2::RouteTable",
-      "Properties" : {
-        "VpcId" : {"Ref" : "VPC"},
-        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
-      }
-    },
-
-    "PrivateRoute1" : {
-      "Type" : "AWS::EC2::Route",
-      "Properties" : {
-        "RouteTableId" : { "Ref" : "PrivateRouteTable" },
-        "DestinationCidrBlock" : "0.0.0.0/0",
-        "InstanceId" : { "Ref" : "CMDServerInstance" }
-      }
-    },
-
-    "SubnetRouteTableAssociation2" : {
-      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties" : {
-        "SubnetId" : { "Ref" : "PrivateSubnet" },
-        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
-      }
-    },
-
-    "PrivateSecurityGroup" : {
-      "Type" : "AWS::EC2::SecurityGroup",
-      "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
-        "GroupDescription" : "Enable SSH access via port 22",
-        "SecurityGroupIngress" : [
-          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24" },
-          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1",  "CidrIp" : "10.0.0.0/24" }
-        ]
-      }
-    },
-
 
     "CLIInstance01" : {
       "Type" : "AWS::EC2::Instance",
@@ -367,11 +293,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CLIInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "CLIInstanceType"},
-        "PrivateIpAddress" : "10.0.10.11",
+        "PrivateIpAddress" : "10.0.0.11",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "device-emulator-client-instance-01" }
@@ -385,11 +311,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CLIInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "CLIInstanceType"},
-        "PrivateIpAddress" : "10.0.10.12",
+        "PrivateIpAddress" : "10.0.0.12",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "device-emulator-client-instance-02" }
@@ -403,11 +329,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CLIInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "CLIInstanceType"},
-        "PrivateIpAddress" : "10.0.10.13",
+        "PrivateIpAddress" : "10.0.0.13",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "device-emulator-client-instance-03" }
@@ -421,11 +347,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SRVInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "SRVInstanceType"},
-        "PrivateIpAddress" : "10.0.10.21",
+        "PrivateIpAddress" : "10.0.0.21",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "websocket-server-instance-01" }
@@ -439,11 +365,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SRVInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "SRVInstanceType"},
-        "PrivateIpAddress" : "10.0.10.22",
+        "PrivateIpAddress" : "10.0.0.22",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "websocket-server-instance-02" }
@@ -457,11 +383,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SRVInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "SRVInstanceType"},
-        "PrivateIpAddress" : "10.0.10.23",
+        "PrivateIpAddress" : "10.0.0.23",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "websocket-server-instance-03" }
@@ -475,11 +401,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "KFKInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "KFKInstanceType"},
-        "PrivateIpAddress" : "10.0.10.31",
+        "PrivateIpAddress" : "10.0.0.31",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "kafka-instance-01" }
@@ -493,11 +419,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "KFKInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "KFKInstanceType"},
-        "PrivateIpAddress" : "10.0.10.32",
+        "PrivateIpAddress" : "10.0.0.32",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "kafka-instance-02" }
@@ -511,11 +437,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "KFKInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "KFKInstanceType"},
-        "PrivateIpAddress" : "10.0.10.33",
+        "PrivateIpAddress" : "10.0.0.33",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "kafka-instance-03" }
@@ -529,11 +455,11 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ZKInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "ZKInstanceType"},
-        "PrivateIpAddress" : "10.0.10.41",
+        "PrivateIpAddress" : "10.0.0.41",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "zookeeper-instance-01" }
@@ -547,86 +473,23 @@
       "Properties" : {
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ZKInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
+        "SecurityGroupIds" : [{"Ref" : "MainSecurityGroup"}],
+        "SubnetId" : {"Ref" : "MainSubnet"},
         "KeyName" : {"Ref" : "KeyName"},
         "InstanceType" : {"Ref": "ZKInstanceType"},
-        "PrivateIpAddress" : "10.0.10.42",
+        "PrivateIpAddress" : "10.0.0.42",
         "Tags": [
           { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
           { "Key": "Name", "Value" : "zookeeper-instance-02" }
         ]
       }
-    },
-
-    "CASInstance01" : {
-      "Type" : "AWS::EC2::Instance",
-      "Condition" : "CasModeInstallSingle",
-      "Properties" : {
-        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2DatastaxAMI", { "Ref" : "AWS::Region" },
-          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CASInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "CASInstanceType"},
-        "PrivateIpAddress" : "10.0.10.51",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "cassandra-instance-01" }
-        ],
-        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
-          "--clustername BAMLabsDSEClusterDemo ",
-          "--totalnodes 6 ",
-          "--version enterprise ",
-          "--username igormasternoy_gmail.com ",
-          "--password P6foSnAW7rxHcYV ",
-          "--analyticsnodes 3"
-        ]]}}
-      }
-    },
-
-    "CASInstance02" : {
-      "Type" : "AWS::EC2::Instance",
-      "Condition" : "CasModeInstallSingle",
-      "Properties" : {
-        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2DatastaxAMI", { "Ref" : "AWS::Region" },
-          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CASInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "CASInstanceType"},
-        "PrivateIpAddress" : "10.0.10.52",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "cassandra-instance-02" }
-        ]
-      }
-    },
-
-    "CASInstance03" : {
-      "Type" : "AWS::EC2::Instance",
-      "Condition" : "CasModeInstallSingle",
-      "Properties" : {
-        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2DatastaxAMI", { "Ref" : "AWS::Region" },
-          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "CASInstanceType" }, "Arch" ] } ]},
-        "SecurityGroupIds" : [{"Ref" : "PrivateSecurityGroup"}],
-        "SubnetId" : {"Ref" : "PrivateSubnet"},
-        "KeyName" : {"Ref" : "KeyName"},
-        "InstanceType" : {"Ref": "CASInstanceType"},
-        "PrivateIpAddress" : "10.0.10.53",
-        "Tags": [
-          { "Key": "Application", "Value": {"Ref": "AWS::StackId"} },
-          { "Key": "Name", "Value" : "cassandra-instance-03" }
-        ]
-      }
     }
-
   },
 
   "Outputs" : {
     "CMDInstanceEIP" : {
       "Value" : { "Ref" : "CMDEip" },
-      "Description" : "Created Command Server EIP"
+      "Description" : "Command Box EIP"
     }
   }
 
